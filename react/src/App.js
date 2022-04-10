@@ -19,10 +19,23 @@ class App extends React.Component {
     this.state = { seconds: 0, buses: [] };
   }
 
+  updateTimes() {
+    axios.get('http://127.0.0.1:8000/bus_departures', {'timeout': 5000}).then(resp => {
+      console.log(resp.data)
+      this.setState(state => ({
+        buses: resp.data.buses
+      }));
+    });
+  }
+
   tick() {
+    if (this.state.seconds % 15 == 0) {
+      this.updateTimes()
+    }
     this.setState(state => ({
       seconds: state.seconds + 1
     }));
+    
   }
 
   componentDidMount() {
