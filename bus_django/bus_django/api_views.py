@@ -30,6 +30,31 @@ stop_times = pd.read_csv(BytesIO(stop_times))
 bens_stop_nb_seven = 1260
 bens_stop_sb_seven = 4152
 
+def GetDirection(trip_id):
+    if not trip_id:
+        return None
+    else:
+        trip_df = trips_df[trips_df['trip_id']==trip_id].reset_index()
+        if "NB" in trip_df['trip_headsign'][0]:
+            return "NB"
+        elif "SB" in trip_df['trip_headsign'][0]:
+            return "SB"
+        else:
+            return None
+
+def GetDistanceTraveled(trip_id, stop_id):
+    if trip_id and stop_id:
+        # filter stops schedule down to this exact trip
+        schedule = stop_times[stop_times['trip_id']==trip_id].reset_index()
+        stop_schedule = schedule[schedule['stop_id']==int(stop_id)].reset_index()
+        # write distance
+        if stop_schedule.size > 0:
+            return stop_schedule['shape_dist_traveled'][0]
+        else:
+            return None
+    else:
+        return None
+
 def GetScheduledArrivalTime(direction, trip_id):
     if direction == "NB":
         bens_stop = stop_times[(stop_times['trip_id']==trip_id) & (stop_times['stop_id'] == bens_stop_nb_seven)].reset_index()
@@ -39,10 +64,10 @@ def GetScheduledArrivalTime(direction, trip_id):
         return bens_stop['departure_time'][0]
     
 def MilesToBen(direction, route_distance):
-    if direction == "NB":
-        return 19.838 - route_distance
-    elif direction == "SB":
-        return 6.175 - route_distance
+    if direction == "NB" and route_distance:
+        return 19.838 - float(route_distance)
+    elif direction == "SB" and route_distance:
+        return 6.175 - float(route_distance)
 
 def MinutesToArrival(direction, stop_sequence, scheduled_stop_arrival, seconds_late):
     # Catch passed buses
@@ -83,8 +108,6 @@ class BusDeparturesView(View):
             'longitude',
             'bearing',
             'speed',
-            'direction',
-            'route_distance',
             'seconds_late'
         ]
         bus_df = pd.DataFrame(columns=columns,data=[])
@@ -141,24 +164,11 @@ class BusDeparturesView(View):
                     data_list += [vehicle.vehicle.position.speed]
                 else: 
                     data_list += [None]
-                
-                # Direction Identification
-                if vehicle.vehicle.trip.trip_id:
-                    trip_df = trips_df[trips_df['trip_id']==vehicle.vehicle.trip.trip_id].reset_index()
-                    if "NB" in trip_df['trip_headsign'][0]:
-                        data_list += ["NB"]
-                    elif "SB" in trip_df['trip_headsign'][0]:
-                        data_list += ["SB"]
-                    else:
-                        data_list += [None]
-                
                 # Early / Late calculation & route-distance 
                 if vehicle.vehicle.stop_id and vehicle.vehicle.trip.trip_id:
                     # filter stops schedule down to this exact trip
                     schedule = stop_times[stop_times['trip_id']==vehicle.vehicle.trip.trip_id].reset_index()
                     stop_schedule = schedule[schedule['stop_id']==int(vehicle.vehicle.stop_id)].reset_index()
-                    # write distance
-                    data_list += [stop_schedule['shape_dist_traveled'][0]]
                     # snag real and scheduled times
                     real_time = datetime.fromtimestamp(vehicle.vehicle.timestamp)
                     scheduled_time_str = stop_schedule['departure_time'][0]
@@ -170,7 +180,7 @@ class BusDeparturesView(View):
                     time_diff = abs(real_time - scheduled_time).seconds
                     data_list += [time_diff]
                 else:
-                    data_list += [None, None]
+                    data_list += [None]
                     
                     
                 # Add Row to DataFrame   
@@ -179,8 +189,10 @@ class BusDeparturesView(View):
 
         # Convert lat/lon to GeoDataFrame
         bus_gdf = gpd.GeoDataFrame(bus_df, geometry=gpd.points_from_xy(bus_df.longitude, bus_df.latitude))
+        bus_gdf['direction']              = bus_gdf.apply(lambda row: GetDirection(row['trip_id']), axis=1)
+        bus_gdf['distance_traveled']      = bus_gdf.apply(lambda row: GetDistanceTraveled(row['trip_id'], row['stop_id']), axis=1)
         bus_gdf['scheduled_stop_arrival'] = bus_gdf.apply(lambda row: GetScheduledArrivalTime(row['direction'], row['trip_id']), axis=1)
-        bus_gdf['miles_to_stop']          = bus_gdf.apply(lambda row: MilesToBen(row['direction'], row['route_distance']), axis=1)
+        bus_gdf['miles_to_stop']          = bus_gdf.apply(lambda row: MilesToBen(row['direction'], row['distance_traveled']), axis=1)
         bus_gdf['minutes_away']           = bus_gdf.apply(lambda row: MinutesToArrival(row['direction'], row['current_stop_sequence'], row['scheduled_stop_arrival'], row['seconds_late']), axis=1)
 
 
