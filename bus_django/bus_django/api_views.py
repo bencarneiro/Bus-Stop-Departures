@@ -12,6 +12,24 @@ import urllib
 from zipfile import ZipFile
 from datetime import datetime, date, timedelta
 
+# read GTFS Data to get linking IDS from capmetro
+resp = urlopen("https://data.texas.gov/download/r4v4-vz24/application%2Fzip")
+zipfile = ZipFile(BytesIO(resp.read()))
+
+# Initialize trips DF to lookup real time data
+with zipfile.open('trips.txt') as myfile:
+    trips_csv = myfile.read()
+trips_df = pd.read_csv(BytesIO(trips_csv))
+
+# Initialize order of Northbound and Southbound Stops for ATX route #7
+with zipfile.open('stop_times.txt') as myfile:
+    stop_times = myfile.read()
+stop_times = pd.read_csv(BytesIO(stop_times))
+# sb_stops = stop_times[stop_times['trip_id']=='2630858_MRG_3'][['stop_sequence', 'stop_id', 'shape_dist_traveled']].reset_index()
+# nb_stops = stop_times[stop_times['trip_id']=='2630928_MRG_6'][['stop_sequence', 'stop_id', 'shape_dist_traveled']].reset_index()
+bens_stop_nb_seven = 1260
+bens_stop_sb_seven = 4152
+
 def GetScheduledArrivalTime(direction, trip_id):
     if direction == "NB":
         bens_stop = stop_times[(stop_times['trip_id']==trip_id) & (stop_times['stop_id'] == bens_stop_nb_seven)].reset_index()
@@ -47,24 +65,6 @@ class BusDeparturesView(View):
     # bus.com/departures
 
     def get(self, request, *args, **kwargs):
-
-        # read GTFS Data to get linking IDS from capmetro
-        resp = urlopen("https://data.texas.gov/download/r4v4-vz24/application%2Fzip")
-        zipfile = ZipFile(BytesIO(resp.read()))
-
-        # Initialize trips DF to lookup real time data
-        with zipfile.open('trips.txt') as myfile:
-            trips_csv = myfile.read()
-        trips_df = pd.read_csv(BytesIO(trips_csv))
-
-        # Initialize order of Northbound and Southbound Stops for ATX route #7
-        with zipfile.open('stop_times.txt') as myfile:
-            stop_times = myfile.read()
-        stop_times = pd.read_csv(BytesIO(stop_times))
-        # sb_stops = stop_times[stop_times['trip_id']=='2630858_MRG_3'][['stop_sequence', 'stop_id', 'shape_dist_traveled']].reset_index()
-        # nb_stops = stop_times[stop_times['trip_id']=='2630928_MRG_6'][['stop_sequence', 'stop_id', 'shape_dist_traveled']].reset_index()
-        bens_stop_nb_seven = 1260
-        bens_stop_sb_seven = 4152
 
         # Pull Most Recent Data and format it into a geodataframe
 
@@ -186,13 +186,13 @@ class BusDeparturesView(View):
 
         display_info = bus_gdf[bus_gdf['minutes_away'] != 'PAST STOP'][['minutes_away', 'direction', 'miles_to_stop', 'scheduled_stop_arrival', 'seconds_late' ]].sort_values(by=['direction', 'minutes_away']).reset_index()
         resp_arr = []
-        for x in range(display_info.length):
+        for index, row in display_info.iterrows():
             bus_obj = {
-                'direction': display_info['direction'][x],
-                'minutes_away': display_info['minutes_away'][x],
-                'miles_to_stop': display_info['miles_to_stop'][x],
-                'scheduled_stop_arrival': display_info['scheduled_stop_arrival'][x],
-                'seconds_late': display_info['seconds_late'][x]
+                'direction': row['direction'],
+                'minutes_away': row['minutes_away'],
+                'miles_to_stop': row['miles_to_stop'],
+                'scheduled_stop_arrival': row['scheduled_stop_arrival'],
+                'seconds_late': row['seconds_late']
             }
             resp_arr += [bus_obj]
         resp_obj = {
