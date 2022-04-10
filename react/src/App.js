@@ -21,7 +21,6 @@ class App extends React.Component {
 
   updateTimes() {
     axios.get('http://127.0.0.1:8000/bus_departures', {'timeout': 5000}).then(resp => {
-      console.log(resp.data)
       this.setState(state => ({
         buses: resp.data.buses
       }));
@@ -35,16 +34,14 @@ class App extends React.Component {
     this.setState(state => ({
       seconds: state.seconds + 1
     }));
-    
   }
 
   componentDidMount() {
     this.interval = setInterval(() => this.tick(), 1000);
 
     axios.get('http://127.0.0.1:8000/bus_departures', {'timeout': 5000}).then(resp => {
-      console.log(resp.data)
       this.setState(state => ({
-        buses: resp.data.buses
+        buses: resp.data.data
       }));
     });
   }
@@ -70,7 +67,7 @@ class App extends React.Component {
               </TableRow>
             </TableHead>
             <TableBody>
-              {this.state.buses.map((row) => (
+              {this.state.buses?.map((row) => (
                 row.direction == "NB" &&
                 <TableRow
                   key={row.name}
@@ -101,7 +98,7 @@ class App extends React.Component {
               </TableRow>
             </TableHead>
             <TableBody>
-              {this.state.buses.map((row) => (
+              {this.state.buses?.map((row) => (
                 row.direction == "SB" &&
                 <TableRow
                   key={row.name}

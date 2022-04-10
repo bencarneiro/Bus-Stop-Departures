@@ -210,4 +210,4 @@ class BusDeparturesView(View):
         resp_obj = {
             'buses': resp_arr
         }
-        return JsonResponse(data=resp_obj)
+        return JsonResponse(data=resp_obj, content_type='application/json', safe=True)
