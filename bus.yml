@@ -8,6 +8,7 @@ dependencies:
   - jupyterlab
   - geopandas
   - osmnx
+  - pip
   - pip:
       - django-cors-headers
       - djangorestframework
