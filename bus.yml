@@ -1,0 +1,10 @@
+name: bus
+
+channels:
+  - conda-forge
+
+dependencies:
+  - django
+  - jupyterlab
+  - geopandas
+  - osmnx
