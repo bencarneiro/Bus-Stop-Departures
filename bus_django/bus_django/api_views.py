@@ -11,6 +11,7 @@ from google.transit import gtfs_realtime_pb2
 import urllib
 from zipfile import ZipFile
 from datetime import datetime, date, timedelta
+import math
 
 # read GTFS Data to get linking IDS from capmetro
 resp = urlopen("https://data.texas.gov/download/r4v4-vz24/application%2Fzip")
@@ -199,10 +200,14 @@ class BusDeparturesView(View):
         display_info = bus_gdf[bus_gdf['minutes_away'] != 'PAST STOP'][['minutes_away', 'direction', 'miles_to_stop', 'scheduled_stop_arrival', 'seconds_late' ]].sort_values(by=['direction', 'minutes_away']).reset_index()
         resp_arr = []
         for index, row in display_info.iterrows():
+            if math.isnan(row['miles_to_stop']):
+                mts = "Unknown"
+            else:
+                mts = row['miles_to_stop']
             bus_obj = {
                 'direction': row['direction'],
                 'minutes_away': row['minutes_away'],
-                'miles_to_stop': row['miles_to_stop'],
+                'miles_to_stop': mts,
                 'scheduled_stop_arrival': row['scheduled_stop_arrival'],
                 'seconds_late': row['seconds_late']
             }
@@ -210,4 +215,7 @@ class BusDeparturesView(View):
         resp_obj = {
             'buses': resp_arr
         }
-        return JsonResponse(data=resp_obj, content_type='application/json', safe=True)
+        headers = {
+            'Access-Control-Allow-Origin': "http://127.0.0.1:3000"
+        }
+        return JsonResponse(headers=headers, data=resp_obj, content_type='application/json')
