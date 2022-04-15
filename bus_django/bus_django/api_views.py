@@ -207,8 +207,6 @@ class BusDeparturesView(View):
                 else: 
                     data_list += [None]
 
-                    
-                    
                 # Add Row to DataFrame   
                 temp_df = pd.DataFrame(columns=columns,data=[data_list])
                 bus_df = pd.concat([bus_df,temp_df], ignore_index=True)
@@ -228,7 +226,7 @@ class BusDeparturesView(View):
 #        'seconds_late', 'scheduled_stop_arrival', 'miles_to_stop',
 #        'minutes_away'
 
-        display_info = bus_gdf[bus_gdf['minutes_away'] != 'PAST STOP'][['minutes_away', 'direction', 'miles_to_stop', 'scheduled_stop_arrival', 'seconds_late', 'current_stop_name', 'current_stop_sequence']].sort_values(by=['direction', 'minutes_away']).reset_index()
+        display_info = bus_gdf[bus_gdf['minutes_away'] != 'PAST STOP'][['minutes_away', 'direction', 'miles_to_stop', 'scheduled_stop_arrival', 'seconds_late', 'current_stop_name', 'current_stop_sequence']].sort_values(by=['direction', 'current_stop_sequence'], ascending=False).reset_index()
         resp_arr = []
         for index, row in display_info.iterrows():
             if math.isnan(row['miles_to_stop']):
