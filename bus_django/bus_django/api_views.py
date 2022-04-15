@@ -50,7 +50,9 @@ def GetDirection(trip_id):
         else:
             return None
 
-def GetStopName(stop_id):
+def GetStopName(stop_id, stop_sequence):
+    if stop_sequence and int(stop_sequence) == 1:
+        return "Terminus"
     if stop_id:
         stop_info = stops[stops['stop_id'] == int(stop_id)].reset_index()
         return stop_info['stop_name'][0]
@@ -221,7 +223,7 @@ class BusDeparturesView(View):
         # Convert lat/lon to GeoDataFrame
         bus_gdf = gpd.GeoDataFrame(bus_df, geometry=gpd.points_from_xy(bus_df.longitude, bus_df.latitude))
         bus_gdf['direction']              = bus_gdf.apply(lambda row: GetDirection(row['trip_id']), axis=1)
-        bus_gdf['current_stop_name']      = bus_gdf.apply(lambda row: GetStopName(row['stop_id']), axis=1)
+        bus_gdf['current_stop_name']      = bus_gdf.apply(lambda row: GetStopName(row['stop_id'], row['current_stop_sequence']), axis=1)
         bus_gdf['distance_traveled']      = bus_gdf.apply(lambda row: GetDistanceTraveled(row['trip_id'], row['stop_id']), axis=1)
         bus_gdf['seconds_late']           = bus_gdf.apply(lambda row: SecondsLate(row['trip_id'], row['stop_id'], row['timestamp']), axis=1)
         bus_gdf['scheduled_stop_arrival'] = bus_gdf.apply(lambda row: GetScheduledArrivalTime(row['direction'], row['trip_id']), axis=1)
