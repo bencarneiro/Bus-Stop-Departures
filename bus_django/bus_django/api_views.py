@@ -12,6 +12,7 @@ import urllib
 from zipfile import ZipFile
 from datetime import datetime, date, timedelta
 import math
+from dateutil import tz
 
 # read GTFS Data to get linking IDS from capmetro
 resp = urlopen("https://data.texas.gov/download/r4v4-vz24/application%2Fzip")
@@ -53,6 +54,28 @@ def GetDistanceTraveled(trip_id, stop_id):
             return stop_schedule['shape_dist_traveled'][0]
         else:
             return None
+    else:
+        return None
+
+def SecondsLate(trip_id, stop_id, timestamp):
+    schedule = stop_times[stop_times['trip_id']==trip_id].reset_index()
+    stop_schedule = schedule[schedule['stop_id']==int(stop_id)].reset_index()
+    timezone = tz.gettz("America/Chicago")
+    real_time = datetime.fromtimestamp(timestamp, tz=timezone)
+    scheduled_time_str = stop_schedule['departure_time'][0]
+    today = date.today()
+    today_str = today.strftime("%Y-%m-%d")
+    scheduled_time_str = today_str + " " + scheduled_time_str
+    print("string")
+    print(scheduled_time_str)
+    scheduled_time = datetime.strptime(scheduled_time_str, '%Y-%m-%d %H:%M:%S').replace(tzinfo=timezone)
+    print('times')
+    print(scheduled_time)
+    print(real_time)
+    # Calculate early / Late
+    time_diff = abs(real_time - scheduled_time).seconds
+    if time_diff:
+        return time_diff
     else:
         return None
 
@@ -108,8 +131,7 @@ class BusDeparturesView(View):
             'latitude', 
             'longitude',
             'bearing',
-            'speed',
-            'seconds_late'
+            'speed'
         ]
         bus_df = pd.DataFrame(columns=columns,data=[])
         for vehicle in feed.entity:
@@ -165,23 +187,7 @@ class BusDeparturesView(View):
                     data_list += [vehicle.vehicle.position.speed]
                 else: 
                     data_list += [None]
-                # Early / Late calculation & route-distance 
-                if vehicle.vehicle.stop_id and vehicle.vehicle.trip.trip_id:
-                    # filter stops schedule down to this exact trip
-                    schedule = stop_times[stop_times['trip_id']==vehicle.vehicle.trip.trip_id].reset_index()
-                    stop_schedule = schedule[schedule['stop_id']==int(vehicle.vehicle.stop_id)].reset_index()
-                    # snag real and scheduled times
-                    real_time = datetime.fromtimestamp(vehicle.vehicle.timestamp)
-                    scheduled_time_str = stop_schedule['departure_time'][0]
-                    today = date.today()
-                    today_str = today.strftime("%Y-%m-%d")
-                    scheduled_time_str = today_str + " " + scheduled_time_str
-                    scheduled_time = datetime.strptime(scheduled_time_str, '%Y-%m-%d %H:%M:%S')
-                    # Calculate early / Late
-                    time_diff = abs(real_time - scheduled_time).seconds
-                    data_list += [time_diff]
-                else:
-                    data_list += [None]
+
                     
                     
                 # Add Row to DataFrame   
@@ -192,6 +198,7 @@ class BusDeparturesView(View):
         bus_gdf = gpd.GeoDataFrame(bus_df, geometry=gpd.points_from_xy(bus_df.longitude, bus_df.latitude))
         bus_gdf['direction']              = bus_gdf.apply(lambda row: GetDirection(row['trip_id']), axis=1)
         bus_gdf['distance_traveled']      = bus_gdf.apply(lambda row: GetDistanceTraveled(row['trip_id'], row['stop_id']), axis=1)
+        bus_gdf['seconds_late']           = bus_gdf.apply(lambda row: SecondsLate(row['trip_id'], row['stop_id'], row['timestamp']), axis=1)
         bus_gdf['scheduled_stop_arrival'] = bus_gdf.apply(lambda row: GetScheduledArrivalTime(row['direction'], row['trip_id']), axis=1)
         bus_gdf['miles_to_stop']          = bus_gdf.apply(lambda row: MilesToBen(row['direction'], row['distance_traveled']), axis=1)
         bus_gdf['minutes_away']           = bus_gdf.apply(lambda row: MinutesToArrival(row['direction'], row['current_stop_sequence'], row['scheduled_stop_arrival'], row['seconds_late']), axis=1)
