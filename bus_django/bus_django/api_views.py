@@ -64,10 +64,8 @@ def GetDistanceTraveled(trip_id, stop_id):
         stop_schedule = schedule[schedule['stop_id']==int(stop_id)].reset_index()
         # write distance
         if stop_schedule.size > 0:
-            print(stop_schedule['shape_dist_traveled'][0])
             return stop_schedule['shape_dist_traveled'][0]
         else:
-            print('none found')
             return None
     else:
         return None
@@ -109,8 +107,6 @@ def GetMinutesToScheduledArrivalTime(scheduled_arrival_time):
         return None
     
 def MilesToBen(direction, route_distance):
-    print("rd")
-    print(route_distance)
     if direction == "NB" and route_distance:
         return 19.838 - float(route_distance)
     elif direction == "SB" and route_distance:
@@ -161,13 +157,9 @@ class BusDeparturesView(View):
             'speed'
         ]
         bus_df = pd.DataFrame(columns=columns,data=[])
-        z = 0
         for vehicle in feed.entity:
             data_list = [vehicle.id]
             if vehicle.vehicle.trip.route_id == "7":
-                z += 1
-                if z < 2:
-                    print(vehicle)
                 # Route ID
                 if vehicle.vehicle.trip.route_id:
                     data_list += [vehicle.vehicle.trip.route_id]
