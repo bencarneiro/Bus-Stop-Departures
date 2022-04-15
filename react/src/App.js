@@ -104,11 +104,13 @@ class App extends React.Component {
                       {row.minutes_to_scheduled < 0 && (
                         <TableCell align="right">
                           {row.scheduled_stop_arrival} (
-                          {row.minutes_to_scheduled} Min Ago)
+                          {row.minutes_to_scheduled * -1} Min Ago)
                         </TableCell>
                       )}
                       {row.minutes_to_scheduled == 0 && (
-                        <TableCell align="right">(NOW)</TableCell>
+                        <TableCell align="right">
+                          {row.scheduled_stop_arrival} (NOW)
+                        </TableCell>
                       )}
                       <TableCell align="right">
                         {Math.round(row.seconds_late / 60)}
@@ -167,11 +169,13 @@ class App extends React.Component {
                       {row.minutes_to_scheduled < 0 && (
                         <TableCell align="right">
                           {row.scheduled_stop_arrival} (
-                          {row.minutes_to_scheduled} Min Ago)
+                          {row.minutes_to_scheduled * -1} Min Ago)
                         </TableCell>
                       )}
                       {row.minutes_to_scheduled == 0 && (
-                        <TableCell align="right">(NOW)</TableCell>
+                        <TableCell align="right">
+                          {row.scheduled_stop_arrival} (NOW)
+                        </TableCell>
                       )}
                       <TableCell align="right">
                         {Math.round(row.seconds_late / 60)}
