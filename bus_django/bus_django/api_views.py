@@ -80,7 +80,7 @@ def SecondsLate(trip_id, stop_id, timestamp):
     scheduled_time_str = today_str + " " + scheduled_time_str
     scheduled_time = datetime.strptime(scheduled_time_str, '%Y-%m-%d %H:%M:%S').replace(tzinfo=timezone)
     # Calculate early / Late
-    time_diff = abs(real_time - scheduled_time).seconds
+    time_diff = datetime.timestamp(real_time) - datetime.timestamp(scheduled_time)
     if time_diff:
         return time_diff
     else:
@@ -231,7 +231,7 @@ class BusDeparturesView(View):
 #        'seconds_late', 'scheduled_stop_arrival', 'miles_to_stop',
 #        'minutes_away'
 
-        display_info = bus_gdf[bus_gdf['minutes_away'] != 'PAST STOP'][['minutes_away', 'direction', 'miles_to_stop', 'scheduled_stop_arrival', 'seconds_late', 'current_stop_name', 'current_stop_sequence', 'minutes_to_scheduled', 'status']].sort_values(by=['direction', 'current_stop_sequence'], ascending=False).reset_index()
+        display_info = bus_gdf[bus_gdf['minutes_away'] != 'PAST STOP'][['minutes_away', 'direction', 'miles_to_stop', 'scheduled_stop_arrival', 'seconds_late', 'current_stop_name', 'current_stop_sequence', 'minutes_to_scheduled', 'status']].sort_values(by=['scheduled_stop_arrival']).sort_values(by=['direction', 'current_stop_sequence'], ascending=False).reset_index()
         resp_arr = []
         for index, row in display_info.iterrows():
             if math.isnan(row['miles_to_stop']):
