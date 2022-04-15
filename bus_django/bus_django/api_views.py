@@ -128,10 +128,10 @@ def MinutesToArrival(direction, stop_sequence, scheduled_stop_arrival, seconds_l
         today_str = today.strftime("%Y-%m-%d")
         scheduled_time_str = today_str + " " + scheduled_stop_arrival
         scheduled_time = datetime.strptime(scheduled_time_str, '%Y-%m-%d %H:%M:%S').replace(tzinfo=timezone)
-        if seconds_late > 0:
-            eta = scheduled_time + timedelta(seconds=seconds_late)
-        else:
+        if seconds_late < 0 and stop_sequence == 1:
             eta = scheduled_time
+        else:
+            eta = scheduled_time + timedelta(seconds=seconds_late)
         seconds_away = abs(eta - datetime.now(tz=timezone)).seconds
         minutes_away = round(seconds_away/60)
         return f"{minutes_away}"
