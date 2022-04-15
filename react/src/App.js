@@ -96,10 +96,21 @@ class App extends React.Component {
                       {row.miles_to_stop == "Unknown" && (
                         <TableCell align="right">{row.miles_to_stop}</TableCell>
                       )}
-                      <TableCell align="right">
-                        {row.scheduled_stop_arrival} ({row.minutes_to_scheduled}{" "}
-                        Min)
-                      </TableCell>
+                      {row.minutes_to_scheduled > 0 && (
+                        <TableCell align="right">
+                          {row.scheduled_stop_arrival} (
+                          {row.minutes_to_scheduled} Min)
+                        </TableCell>
+                      )}
+                      {row.minutes_to_scheduled < 0 && (
+                        <TableCell align="right">
+                          {row.scheduled_stop_arrival} (
+                          {row.minutes_to_scheduled} Min Ago)
+                        </TableCell>
+                      )}
+                      {row.minutes_to_scheduled == 0 && (
+                        <TableCell align="right">(NOW)</TableCell>
+                      )}
                       <TableCell align="right">
                         {Math.round(row.seconds_late / 60)}
                       </TableCell>
@@ -148,10 +159,21 @@ class App extends React.Component {
                       {row.miles_to_stop == "Unknown" && (
                         <TableCell align="right">{row.miles_to_stop}</TableCell>
                       )}
-                      <TableCell align="right">
-                        {row.scheduled_stop_arrival} ({row.minutes_to_scheduled}{" "}
-                        Min)
-                      </TableCell>
+                      {row.minutes_to_scheduled > 0 && (
+                        <TableCell align="right">
+                          {row.scheduled_stop_arrival} (
+                          {row.minutes_to_scheduled} Min)
+                        </TableCell>
+                      )}
+                      {row.minutes_to_scheduled < 0 && (
+                        <TableCell align="right">
+                          {row.scheduled_stop_arrival} (
+                          {row.minutes_to_scheduled} Min Ago)
+                        </TableCell>
+                      )}
+                      {row.minutes_to_scheduled == 0 && (
+                        <TableCell align="right">(NOW)</TableCell>
+                      )}
                       <TableCell align="right">
                         {Math.round(row.seconds_late / 60)}
                       </TableCell>
