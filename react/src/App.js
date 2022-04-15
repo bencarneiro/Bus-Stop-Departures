@@ -82,11 +82,20 @@ class App extends React.Component {
                         {row.direction}
                       </TableCell>
                       <TableCell align="right">{row.minutes_away}</TableCell>
-                      <TableCell align="right">{row.miles_to_stop}</TableCell>
+                      {row.miles_to_stop !== "Unknown" && (
+                        <TableCell align="right">
+                          {Math.round(row.miles_to_stop * 10) / 10}
+                        </TableCell>
+                      )}
+                      {row.miles_to_stop == "Unknown" && (
+                        <TableCell align="right">{row.miles_to_stop}</TableCell>
+                      )}
                       <TableCell align="right">
                         {row.scheduled_stop_arrival}
                       </TableCell>
-                      <TableCell align="right">{row.seconds_late}</TableCell>
+                      <TableCell align="right">
+                        {Math.round(row.seconds_late / 60)}
+                      </TableCell>
                     </TableRow>
                   )
               )}
@@ -117,11 +126,20 @@ class App extends React.Component {
                         {row.direction}
                       </TableCell>
                       <TableCell align="right">{row.minutes_away}</TableCell>
-                      <TableCell align="right">{row.miles_to_stop}</TableCell>
+                      {row.miles_to_stop !== "Unknown" && (
+                        <TableCell align="right">
+                          {Math.round(row.miles_to_stop * 10) / 10}
+                        </TableCell>
+                      )}
+                      {row.miles_to_stop == "Unknown" && (
+                        <TableCell align="right">{row.miles_to_stop}</TableCell>
+                      )}
                       <TableCell align="right">
                         {row.scheduled_stop_arrival}
                       </TableCell>
-                      <TableCell align="right">{row.seconds_late}</TableCell>
+                      <TableCell align="right">
+                        {Math.round(row.seconds_late / 60)}
+                      </TableCell>
                     </TableRow>
                   )
               )}
