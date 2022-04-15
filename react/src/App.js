@@ -78,9 +78,16 @@ class App extends React.Component {
                       key={row.name}
                       sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                     >
-                      <TableCell component="th" scope="row">
-                        {row.current_stop_name}
-                      </TableCell>
+                      {row.status == 2 && (
+                        <TableCell component="th" scope="row">
+                          En Route To {row.current_stop_name}
+                        </TableCell>
+                      )}
+                      {row.status == 1 && (
+                        <TableCell component="th" scope="row">
+                          Stopped At {row.current_stop_name}
+                        </TableCell>
+                      )}
                       {row.miles_to_stop !== "Unknown" && (
                         <TableCell align="right">
                           {Math.round(row.miles_to_stop * 10) / 10}
@@ -123,9 +130,16 @@ class App extends React.Component {
                       key={row.name}
                       sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                     >
-                      <TableCell component="th" scope="row">
-                        {row.current_stop_name}
-                      </TableCell>
+                      {row.status == 2 && (
+                        <TableCell component="th" scope="row">
+                          En Route To {row.current_stop_name}
+                        </TableCell>
+                      )}
+                      {row.status == 1 && (
+                        <TableCell component="th" scope="row">
+                          Stopped At {row.current_stop_name}
+                        </TableCell>
+                      )}
                       {row.miles_to_stop !== "Unknown" && (
                         <TableCell align="right">
                           {Math.round(row.miles_to_stop * 10) / 10}

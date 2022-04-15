@@ -239,7 +239,7 @@ class BusDeparturesView(View):
 #        'seconds_late', 'scheduled_stop_arrival', 'miles_to_stop',
 #        'minutes_away'
 
-        display_info = bus_gdf[bus_gdf['minutes_away'] != 'PAST STOP'][['minutes_away', 'direction', 'miles_to_stop', 'scheduled_stop_arrival', 'seconds_late', 'current_stop_name', 'current_stop_sequence', 'minutes_to_scheduled']].sort_values(by=['direction', 'current_stop_sequence'], ascending=False).reset_index()
+        display_info = bus_gdf[bus_gdf['minutes_away'] != 'PAST STOP'][['minutes_away', 'direction', 'miles_to_stop', 'scheduled_stop_arrival', 'seconds_late', 'current_stop_name', 'current_stop_sequence', 'minutes_to_scheduled', 'status']].sort_values(by=['direction', 'current_stop_sequence'], ascending=False).reset_index()
         resp_arr = []
         for index, row in display_info.iterrows():
             if math.isnan(row['miles_to_stop']):
@@ -254,7 +254,8 @@ class BusDeparturesView(View):
                 'seconds_late': row['seconds_late'],
                 'current_stop_name': row['current_stop_name'],
                 'current_stop_sequence': row['current_stop_sequence'],
-                'minutes_to_scheduled': row['minutes_to_scheduled']
+                'minutes_to_scheduled': row['minutes_to_scheduled'],
+                'status': row['status']
             }
             resp_arr += [bus_obj]
         resp_obj = {
