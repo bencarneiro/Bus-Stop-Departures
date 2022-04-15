@@ -95,6 +95,18 @@ def GetScheduledArrivalTime(direction, trip_id):
     if direction == "SB":
         bens_stop = stop_times[(stop_times['trip_id']==trip_id) & (stop_times['stop_id'] == bens_stop_sb_seven)].reset_index()
         return bens_stop['departure_time'][0]
+
+def GetMinutesGetScheduledArrivalTime(scheduled_arrival_time):
+    if scheduled_arrival_time:
+        real_time = datetime.now(tz=timezone)
+        today = date.today()
+        today_str = today.strftime("%Y-%m-%d")
+        scheduled_time_str = today_str + " " + scheduled_arrival_time
+        scheduled_time = datetime.strptime(scheduled_time_str, '%Y-%m-%d %H:%M:%S').replace(tzinfo=timezone)
+        time_diff = abs(real_time - scheduled_time).seconds
+        return math.floor(time_diff/60)
+    else:
+        return None
     
 def MilesToBen(direction, route_distance):
     print("rd")
@@ -218,6 +230,7 @@ class BusDeparturesView(View):
         bus_gdf['distance_traveled']      = bus_gdf.apply(lambda row: GetDistanceTraveled(row['trip_id'], row['stop_id']), axis=1)
         bus_gdf['seconds_late']           = bus_gdf.apply(lambda row: SecondsLate(row['trip_id'], row['stop_id'], row['timestamp']), axis=1)
         bus_gdf['scheduled_stop_arrival'] = bus_gdf.apply(lambda row: GetScheduledArrivalTime(row['direction'], row['trip_id']), axis=1)
+        bus_gdf['minutes_to_scheduled']   = bus_gdf.apply(lambda row: GetMinutesGetScheduledArrivalTime(row['scheduled_stop_arrival']), axis=1)
         bus_gdf['miles_to_stop']          = bus_gdf.apply(lambda row: MilesToBen(row['direction'], row['distance_traveled']), axis=1)
         bus_gdf['minutes_away']           = bus_gdf.apply(lambda row: MinutesToArrival(row['direction'], row['current_stop_sequence'], row['scheduled_stop_arrival'], row['seconds_late']), axis=1)
 # 'vehicle_id', 'route_id', 'trip_id', 'timestamp',
@@ -226,7 +239,7 @@ class BusDeparturesView(View):
 #        'seconds_late', 'scheduled_stop_arrival', 'miles_to_stop',
 #        'minutes_away'
 
-        display_info = bus_gdf[bus_gdf['minutes_away'] != 'PAST STOP'][['minutes_away', 'direction', 'miles_to_stop', 'scheduled_stop_arrival', 'seconds_late', 'current_stop_name', 'current_stop_sequence']].sort_values(by=['direction', 'current_stop_sequence'], ascending=False).reset_index()
+        display_info = bus_gdf[bus_gdf['minutes_away'] != 'PAST STOP'][['minutes_away', 'direction', 'miles_to_stop', 'scheduled_stop_arrival', 'seconds_late', 'current_stop_name', 'current_stop_sequence', 'minutes_to_scheduled']].sort_values(by=['direction', 'current_stop_sequence'], ascending=False).reset_index()
         resp_arr = []
         for index, row in display_info.iterrows():
             if math.isnan(row['miles_to_stop']):
@@ -240,7 +253,8 @@ class BusDeparturesView(View):
                 'scheduled_stop_arrival': row['scheduled_stop_arrival'],
                 'seconds_late': row['seconds_late'],
                 'current_stop_name': row['current_stop_name'],
-                'current_stop_sequence': row['current_stop_sequence']
+                'current_stop_sequence': row['current_stop_sequence'],
+                'minutes_to_scheduled': row['minutes_to_scheduled']
             }
             resp_arr += [bus_obj]
         resp_obj = {

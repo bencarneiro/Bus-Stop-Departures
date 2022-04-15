@@ -63,11 +63,11 @@ class App extends React.Component {
           <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
             <TableHead>
               <TableRow>
-                <TableCell>Direction</TableCell>
-                <TableCell align="right">Minutes Away</TableCell>
+                <TableCell>Current Stop</TableCell>
                 <TableCell align="right">Miles Away</TableCell>
                 <TableCell align="right">Scheduled Arrival</TableCell>
                 <TableCell align="right">Minutes Late</TableCell>
+                <TableCell align="right">Minutes Away</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -79,9 +79,8 @@ class App extends React.Component {
                       sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                     >
                       <TableCell component="th" scope="row">
-                        {row.direction}
+                        {row.current_stop_name}
                       </TableCell>
-                      <TableCell align="right">{row.minutes_away}</TableCell>
                       {row.miles_to_stop !== "Unknown" && (
                         <TableCell align="right">
                           {Math.round(row.miles_to_stop * 10) / 10}
@@ -91,11 +90,13 @@ class App extends React.Component {
                         <TableCell align="right">{row.miles_to_stop}</TableCell>
                       )}
                       <TableCell align="right">
-                        {row.scheduled_stop_arrival}
+                        {row.scheduled_stop_arrival} ({row.minutes_to_scheduled}{" "}
+                        Min)
                       </TableCell>
                       <TableCell align="right">
                         {Math.round(row.seconds_late / 60)}
                       </TableCell>
+                      <TableCell align="right">{row.minutes_away}</TableCell>
                     </TableRow>
                   )
               )}
@@ -107,11 +108,11 @@ class App extends React.Component {
           <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
             <TableHead>
               <TableRow>
-                <TableCell>Direction</TableCell>
-                <TableCell align="right">Minutes Away</TableCell>
+                <TableCell>Current Stop</TableCell>
                 <TableCell align="right">Miles Away</TableCell>
                 <TableCell align="right">Scheduled Arrival</TableCell>
                 <TableCell align="right">Minutes Late</TableCell>
+                <TableCell align="right">Minutes Away</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -123,9 +124,8 @@ class App extends React.Component {
                       sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                     >
                       <TableCell component="th" scope="row">
-                        {row.direction}
+                        {row.current_stop_name}
                       </TableCell>
-                      <TableCell align="right">{row.minutes_away}</TableCell>
                       {row.miles_to_stop !== "Unknown" && (
                         <TableCell align="right">
                           {Math.round(row.miles_to_stop * 10) / 10}
@@ -135,11 +135,13 @@ class App extends React.Component {
                         <TableCell align="right">{row.miles_to_stop}</TableCell>
                       )}
                       <TableCell align="right">
-                        {row.scheduled_stop_arrival}
+                        {row.scheduled_stop_arrival} ({row.minutes_to_scheduled}{" "}
+                        Min)
                       </TableCell>
                       <TableCell align="right">
                         {Math.round(row.seconds_late / 60)}
                       </TableCell>
+                      <TableCell align="right">{row.minutes_away}</TableCell>
                     </TableRow>
                   )
               )}
