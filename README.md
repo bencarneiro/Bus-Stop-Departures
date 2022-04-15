@@ -6,5 +6,4 @@ The App reads the GTFS (General Transit Feed Speficification) and Real Time Bus 
 
 It's a work in progress
 
-![image](https://user-images.githubusercontent.com/63479105/163627376-21a9a13e-d2ce-4d19-805c-c42baf53e01f.png)
-
+![image](https://user-images.githubusercontent.com/63479105/163628758-d8dd971b-1a1c-4f36-87b4-afa9d3b15900.png)
