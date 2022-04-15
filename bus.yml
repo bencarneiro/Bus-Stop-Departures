@@ -8,3 +8,7 @@ dependencies:
   - jupyterlab
   - geopandas
   - osmnx
+  - pip:
+      - django-cors-headers
+      - djangorestframework
+      - gtfs-realtime-bindings
