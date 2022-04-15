@@ -64,8 +64,10 @@ def GetDistanceTraveled(trip_id, stop_id):
         stop_schedule = schedule[schedule['stop_id']==int(stop_id)].reset_index()
         # write distance
         if stop_schedule.size > 0:
+            print(stop_schedule['shape_dist_traveled'][0])
             return stop_schedule['shape_dist_traveled'][0]
         else:
+            print('none found')
             return None
     else:
         return None
@@ -95,10 +97,16 @@ def GetScheduledArrivalTime(direction, trip_id):
         return bens_stop['departure_time'][0]
     
 def MilesToBen(direction, route_distance):
+    print("rd")
+    print(route_distance)
     if direction == "NB" and route_distance:
         return 19.838 - float(route_distance)
     elif direction == "SB" and route_distance:
         return 6.175 - float(route_distance)
+    elif direction == "NB":
+        return 19.838
+    else:
+        return 6.175
 
 def MinutesToArrival(direction, stop_sequence, scheduled_stop_arrival, seconds_late):
     # Catch passed buses
@@ -220,7 +228,7 @@ class BusDeparturesView(View):
 #        'seconds_late', 'scheduled_stop_arrival', 'miles_to_stop',
 #        'minutes_away'
 
-        display_info = bus_gdf[bus_gdf['minutes_away'] != 'PAST STOP'][['minutes_away', 'direction', 'miles_to_stop', 'scheduled_stop_arrival', 'seconds_late', 'current_stop_name']].sort_values(by=['direction', 'minutes_away']).reset_index()
+        display_info = bus_gdf[bus_gdf['minutes_away'] != 'PAST STOP'][['minutes_away', 'direction', 'miles_to_stop', 'scheduled_stop_arrival', 'seconds_late', 'current_stop_name', 'current_stop_sequence']].sort_values(by=['direction', 'minutes_away']).reset_index()
         resp_arr = []
         for index, row in display_info.iterrows():
             if math.isnan(row['miles_to_stop']):
@@ -233,7 +241,8 @@ class BusDeparturesView(View):
                 'miles_to_stop': mts,
                 'scheduled_stop_arrival': row['scheduled_stop_arrival'],
                 'seconds_late': row['seconds_late'],
-                'current_stop_name': row['current_stop_name']
+                'current_stop_name': row['current_stop_name'],
+                'current_stop_sequence': row['current_stop_sequence']
             }
             resp_arr += [bus_obj]
         resp_obj = {
