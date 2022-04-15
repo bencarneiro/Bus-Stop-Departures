@@ -57,7 +57,6 @@ class App extends React.Component {
   render() {
     return (
       <div>
-        Seconds: {this.state.seconds}
         <h1>NORTH BOUND</h1>
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
